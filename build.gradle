@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+
+    /**
+     * Gradle Versions Plugin
+     * usage: './gradlew dependencyUpdates'
+     * see https://github.com/ben-manes/gradle-versions-plugin#gradle-versions-plugin
+     *
+     * all version numbers are handled on 'ext' section
+     */
+    id "com.github.ben-manes.versions" version "0.51.0"
+}
+
+group = 'de.longri'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://nexus.longri.de/repository/maven-public/"
+        allowInsecureProtocol = true
+    }
+}
+
+dependencies {
+    implementation 'de.longri:fxutils:1.6.3'
+
+    implementation 'org.reflections:reflections:0.10.2'
+    implementation 'org.quartz-scheduler:quartz:2.5.0-rc1'
+    implementation 'org.ini4j:ini4j:0.5.4'
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+
+    testImplementation platform('org.junit:junit-bom:5.11.0-RC1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+//create a single Jar with all dependencies
+task fatJarCrontabScheduler(dependsOn: test, type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    manifest {
+        attributes 'Main-Class': 'de.longri.crontab'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+task deployCrontabScheduler(dependsOn: fatJarCrontabScheduler, type: Copy) {
+    from "build/libs"
+    into "./_RELEASE"
+    include "*.jar"
+    rename("CrontabScheduler-" + "$version" + ".jar", "CrontabScheduler.jar")
+}
