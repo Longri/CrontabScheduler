@@ -1,19 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
+    id "org.ajoberstar.grgit" version "5.2.2"
     id 'org.openjfx.javafxplugin' version '0.1.0'
-
-    /**
-     * Gradle Versions Plugin
-     * usage: './gradlew dependencyUpdates'
-     * see https://github.com/ben-manes/gradle-versions-plugin#gradle-versions-plugin
-     *
-     * all version numbers are handled on 'ext' section
-     */
+    id 'maven-publish'
     id "com.github.ben-manes.versions" version "0.51.0"
 }
 
 group = 'de.longri'
-version = '1.0-SNAPSHOT'
+version = '1.0.1'
 
 repositories {
     mavenCentral()
@@ -24,14 +19,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'de.longri:fxutils:1.6.3'
+    implementation 'de.longri:fxutils:1.10.2'
 
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.quartz-scheduler:quartz:2.5.0-rc1'
     implementation 'org.ini4j:ini4j:0.5.4'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
-    testImplementation platform('org.junit:junit-bom:5.11.0-RC1')
+    testImplementation platform('org.junit:junit-bom:5.11.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
@@ -39,21 +34,57 @@ test {
     useJUnitPlatform()
 }
 
-//create a single Jar with all dependencies
-task fatJarCrontabScheduler(dependsOn: test, type: Jar) {
+// Publish with task => PUBLISH_TO_NEXUS
+
+
+if (file('gradle.properties.local').exists()) {
+    def props = new Properties()
+    file('gradle.properties.local').withInputStream { props.load(it) }
+    props.each { key, value -> project.ext.set(key, value) }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact("build/libs/" + rootProject.name + "-" + version + ".jar") {
+                extension 'jar'
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'deploy'
+            url deployRepoUrl
+            allowInsecureProtocol = true
+            credentials {
+                username = deployRepoUsername
+                password = deployRepoPassword
+            }
+        }
+    }
+}
+task _FAT_JAR(dependsOn: test, type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
-        attributes 'Main-Class': 'de.longri.crontab'
+        attributes 'Main-Class': 'com.longri'
     }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    from(configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
     }
     with jar
 }
-
-task deployCrontabScheduler(dependsOn: fatJarCrontabScheduler, type: Copy) {
-    from "build/libs"
-    into "./_RELEASE"
-    include "*.jar"
-    rename("CrontabScheduler-" + "$version" + ".jar", "CrontabScheduler.jar")
+task _CLEAN_TO_NEXUS {
 }
+task _BUILD_TO_NEXUS(dependsOn: _CLEAN_TO_NEXUS) {
+}
+task PUBLISH_TO_NEXUS(dependsOn: _BUILD_TO_NEXUS) {
+    println "PUBLISH_TO_NEXUS version $version"
+}
+_CLEAN_TO_NEXUS.dependsOn(clean)
+_BUILD_TO_NEXUS.dependsOn(_FAT_JAR)
+PUBLISH_TO_NEXUS.mustRunAfter(_FAT_JAR)
+PUBLISH_TO_NEXUS.dependsOn(publishAllPublicationsToDeployRepository)
+publishMavenPublicationToDeployRepository.dependsOn(_FAT_JAR)
+
+tasks.withType(Copy).all { duplicatesStrategy 'exclude' }
+tasks.withType(Jar).all { duplicatesStrategy 'exclude' }

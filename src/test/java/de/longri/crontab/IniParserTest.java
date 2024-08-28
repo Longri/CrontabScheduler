@@ -47,8 +47,6 @@ class IniParserTest {
 
     @Test
     void testCronJobList() throws Exception {
-        if (SystemType.isWindows()) return;
-
         TRANSLATION.INITIAL("uiText");
 
         //create iniFile
@@ -99,6 +97,19 @@ class IniParserTest {
         assertEquals("JobName", newJob.getName());
         assertEquals("JobMsg", newJob.getArgs());
         assertEquals(JobType.getFromString("LOGGING"), newJob.getType());
+
+    }
+
+    @Test
+    void loadIniFile() throws Exception {
+        FileTransferHandle fileHandle = new Local_FileTransferHandle("./TestFolder/TEST/testIniFile.ini");
+        assertTrue(fileHandle.exists(), "test file must exist");
+        CronJobList jobList = new CronJobList(fileHandle);
+        assertEquals(1, jobList.size, "size must be 1");
+        Cronjob cron = jobList.get(0);
+        assertEquals("JobName1", cron.getName());
+        assertEquals("0 0/5 * ? * * *; LOGGING ;JobName1 ;Log test", cron.toIniString());
+        assertInstanceOf(Job_Logging.class, cron.job);
 
     }
 
