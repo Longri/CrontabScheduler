@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2024 Longri
  *
- * This file is part of fxutils.
+ * This file is part of CrontabScheduler.
  *
  * CrontabScheduler is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 package de.longri.crontab;
 
 import de.longri.crontab.type.JobType;
-import de.longri.utils.CancelTimeOutJob;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;

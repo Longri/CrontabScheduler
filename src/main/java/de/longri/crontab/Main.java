@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2024 Longri
  *
- * This file is part of fxutils.
+ * This file is part of CrontabScheduler.
  *
  * CrontabScheduler is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,12 @@
  */
 package de.longri.crontab;
 
-import de.longri.filetransfer.FileTransferHandle;
-import de.longri.filetransfer.Local_FileTransferHandle;
-import de.longri.logging.LongriLoggerConfiguration;
-import de.longri.logging.LongriLoggerFactory;
-import de.longri.logging.LongriLoggerInit;
-import de.longri.utils.SystemType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.cli.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -37,51 +33,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static de.longri.logging.LongriLogger.CONFIG_PARAMS;
-
 
 public class Main {
     static final int WAIT_TIME = 10;
 
-    static {
-        //initial Logger
-        try {
-
-            if (SystemType.isWindows()) {
-                LongriLoggerConfiguration.setConfigurationFile(Main.class.getClassLoader().getResourceAsStream("logger/LongriLoggerWin.properties"));
-            } else if (SystemType.isLinux() || SystemType.getSystemType() == SystemType.UNKNOWN) {
-                LongriLoggerConfiguration.setConfigurationFile(Main.class.getClassLoader().getResourceAsStream("logger/LongriLoggerLinux.properties"));
-            } else {
-                LongriLoggerConfiguration.setConfigurationFile(Main.class.getClassLoader().getResourceAsStream("logger/LongriLogger.properties"));
-            }
-            LongriLoggerFactory factory = ((LongriLoggerFactory) LoggerFactory.getILoggerFactory());
-            factory.reset();
-            LongriLoggerInit.init();
-
-
-            //Exclude some Classes from debug Logging
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.share.FileInputStream", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.packet.SMB2CreditGrantingPacketHandler", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.packet.SMB2SignatureVerificationPacketHandler", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.packet.SMB3DecryptingPacketHandler", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.transport.tcp.direct.DirectTcpPacketReader", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.transport.tcp.direct.DirectTcpTransport", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.Connection", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.protocol.commons.concurrent.Promise", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.protocol.commons.socket.ProxySocketFactory", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.SMBProtocolNegotiator", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.PacketEncryptor", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.auth.NtlmAuthenticator", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.connection.SMBSessionBuilder", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.asn1.ASN1InputStream", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.ntlm.messages.NtlmChallenge", "error");
-            CONFIG_PARAMS.setProperty("LongriLogger.logLevel:com.hierynomus.smbj.session.Session", "error");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     private static Logger log = LoggerFactory.getLogger(Main.class);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yy-MM-dd hh:mm");
@@ -92,7 +47,7 @@ public class Main {
             CommandLine cmd = getCMD(args);
 
             log.debug("run with ini file: {}", cmd.getOptionValue("p"));
-            FileTransferHandle fileHandle = new Local_FileTransferHandle(cmd.getOptionValue("p").trim());
+            File fileHandle = new File(cmd.getOptionValue("p").trim());
             CronJobList jobs = new CronJobList(fileHandle);
             log = LoggerFactory.getLogger(Main.class);
             log.debug("Found {} jobs in Inifile", jobs.size());

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2024 Longri
  *
- * This file is part of fxutils.
+ * This file is part of CrontabScheduler.
  *
  * CrontabScheduler is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ package de.longri.crontab.type;
 
 
 import de.longri.crontab.Job;
-import de.longri.gdx_utils.Array;
 import org.apache.commons.cli.ParseException;
 import org.reflections.Reflections;
 
@@ -39,7 +38,7 @@ public abstract class JobType {
     /**
      * A collection of all registered job types.
      */
-    static final Array<JobType> VALUES = new Array<>(Array.IDENTITY.EQUALS);
+    static final ArrayList<JobType> VALUES = new ArrayList<>();
 
     /**
      * A JobType representing an unknown job type.

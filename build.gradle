@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'de.longri'
-version = '1.0.1'
+version = '1.1.0'
 
 repositories {
     mavenCentral()
@@ -18,16 +18,28 @@ repositories {
     }
 }
 
+javafx {
+    version = '24-ea+5'
+    modules = ['javafx.controls', 'javafx.fxml', "javafx.web", "javafx.swing"]
+}
+
+
 dependencies {
-    implementation 'de.longri:fxutils:1.10.2'
+//    implementation 'de.longri:fxutils:1.11.0'
 
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.quartz-scheduler:quartz:2.5.0-rc1'
     implementation 'org.ini4j:ini4j:0.5.4'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
+    implementation(group: 'commons-cli', name: 'commons-cli', version: "1.9.0")
+    implementation(group: 'commons-io', name: 'commons-io', version: '2.16.1')
 
     testImplementation platform('org.junit:junit-bom:5.11.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+
+    testImplementation 'org.slf4j:slf4j-api:2.1.0-alpha1'
+    testImplementation 'org.slf4j:slf4j-simple:2.1.0-alpha1'
 }
 
 test {

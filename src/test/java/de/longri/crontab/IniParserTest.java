@@ -1,16 +1,33 @@
+/*
+ * Copyright (C) 2024 Longri
+ *
+ * This file is part of CrontabScheduler.
+ *
+ * CrontabScheduler is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * CrontabScheduler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CrontabScheduler. If not, see <https://www.gnu.org/licenses/>.
+ */
 package de.longri.crontab;
 
 import de.longri.crontab.type.JobType;
-import de.longri.filetransfer.FileTransferHandle;
-import de.longri.filetransfer.Local_FileTransferHandle;
-import de.longri.filetransfer.ResourceTransferHandler;
-import de.longri.fx.TRANSLATION;
-import de.longri.utils.SystemType;
 import org.ini4j.Ini;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -23,9 +40,12 @@ class IniParserTest {
     @Test
     void parseJobs() throws Exception {
 //        if (EXCLUDE.ex()) return;
-        FileTransferHandle iniFileHandle = new ResourceTransferHandler("./test.ini");
+        URL resourceURL = IniParserTest.class.getResource("/test.ini");
+        File resourceFile = new File(resourceURL.getFile());
+        InputStream inputStream = IniParserTest.class.getResourceAsStream("/test.ini");
+
         Ini ini = new Ini();
-        ini.load(iniFileHandle.read());
+        ini.load(inputStream);
 
         Ini.Section jobs_section = ini.get("jobs");
         int count = Integer.parseInt(jobs_section.get("count"));
@@ -34,7 +54,7 @@ class IniParserTest {
         String job1 = jobs_section.get("job1");
         assertEquals("0 0/5 * ? * * *; LOGGING ;JobName1;Log test", job1);
 
-        List<Cronjob> jobs = new CronJobList(iniFileHandle);
+        List<Cronjob> jobs = new CronJobList(resourceFile);
         assertEquals(1, jobs.size());
 
         Job_Logging job_logging = (Job_Logging) jobs.get(0).job;
@@ -47,10 +67,11 @@ class IniParserTest {
 
     @Test
     void testCronJobList() throws Exception {
-        TRANSLATION.INITIAL("uiText");
+
 
         //create iniFile
-        FileTransferHandle fileHandle = new Local_FileTransferHandle("./testIniFile.ini");
+
+        File fileHandle = new File("./testIniFile.ini");
         if (fileHandle.exists()) assertTrue(fileHandle.delete(), "test file must deleted");
 
         //create List
@@ -82,7 +103,7 @@ class IniParserTest {
                 "count = 1\n" +
                 "job1 = 0 0/5 * ? * * *; LOGGING ;JobName ;JobMsg\n" +
                 "\n";
-        assertEquals(expected, fileHandle.readString());
+        assertEquals(expected, Files.readString(fileHandle.toPath()));
 
         //Read ini file into new Object
         CronJobList newList = new CronJobList(fileHandle);
@@ -102,10 +123,10 @@ class IniParserTest {
 
     @Test
     void loadIniFile() throws Exception {
-        FileTransferHandle fileHandle = new Local_FileTransferHandle("./TestFolder/TEST/testIniFile.ini");
+        File fileHandle = new File("./TestFolder/TEST/testIniFile.ini");
         assertTrue(fileHandle.exists(), "test file must exist");
         CronJobList jobList = new CronJobList(fileHandle);
-        assertEquals(1, jobList.size, "size must be 1");
+        assertEquals(1, jobList.size(), "size must be 1");
         Cronjob cron = jobList.get(0);
         assertEquals("JobName1", cron.getName());
         assertEquals("0 0/5 * ? * * *; LOGGING ;JobName1 ;Log test", cron.toIniString());

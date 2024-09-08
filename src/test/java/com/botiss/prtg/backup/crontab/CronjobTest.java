@@ -1,16 +1,32 @@
+/*
+ * Copyright (C) 2024 Longri
+ *
+ * This file is part of CrontabScheduler.
+ *
+ * CrontabScheduler is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * CrontabScheduler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CrontabScheduler. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.botiss.prtg.backup.crontab;
 
 import de.longri.crontab.Cronjob;
 import de.longri.crontab.Job;
 import de.longri.crontab.LocalCronExpression;
 import de.longri.crontab.type.*;
-import de.longri.utils.Crypto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +43,7 @@ class CronjobTest {
 
     @Test
     void isRunNext10Min() throws ParseException {
-        if (EXCLUDE.ex()) return;
+        if (EXCLUDE.LongTimeTests()) return;
         AtomicBoolean runChk = new AtomicBoolean(false);
 
         LocalDateTime now = LocalDateTime.now();
@@ -75,7 +91,7 @@ class CronjobTest {
 
     @Test
     void testSingleExecution() throws ParseException, InterruptedException {
-        if (EXCLUDE.ex()) return;
+        if (EXCLUDE.LongTimeTests()) return;
         LocalDateTime start = LocalDateTime.now().plusMinutes(11);
 
         // remove last preferences Value
@@ -211,7 +227,7 @@ class CronjobTest {
 
     @Test
     void testSingleExecution5Times() throws ParseException, InterruptedException {
-        if (EXCLUDE.ex()) return;
+        if (EXCLUDE.LongTimeTests()) return;
         LocalDateTime start = LocalDateTime.now().plusMinutes(13);
 
         // remove last preferences Value
@@ -346,7 +362,7 @@ class CronjobTest {
 
     @Test
     void testSingleExecutionEveryMinute() throws ParseException, InterruptedException {
-        if (EXCLUDE.ex()) return;
+        if (EXCLUDE.LongTimeTests()) return;
         LocalDateTime start = LocalDateTime.now().plusMinutes(13);
 
         // remove last preferences Value

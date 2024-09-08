@@ -1,12 +1,25 @@
+/*
+ * Copyright (C) 2024 Longri
+ *
+ * This file is part of CrontabScheduler.
+ *
+ * CrontabScheduler is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * CrontabScheduler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CrontabScheduler. If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.botiss;
-import de.longri.crontab.Main;
-import de.longri.logging.LongriLoggerConfiguration;
-import de.longri.logging.LongriLoggerFactory;
-import de.longri.utils.SystemType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BeforeAllAndAfterAllAnnotationsUnitTest {
 
@@ -15,20 +28,6 @@ public class BeforeAllAndAfterAllAnnotationsUnitTest {
     @BeforeAll
     public static void setup() {
 
-        //initial Logger
-        try {
-            if (SystemType.getSystemType() == SystemType.WIN) {
-                LongriLoggerConfiguration.setConfigurationFile(Main.class.getClassLoader().getResourceAsStream("logger/LongriLogger-win.properties"));
-            } else {
-                LongriLoggerConfiguration.setConfigurationFile(Main.class.getClassLoader().getResourceAsStream("logger/LongriLogger.properties"));
-            }
-            ((LongriLoggerFactory) LoggerFactory.getILoggerFactory()).reset();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        log = LoggerFactory.getLogger(BeforeAllAndAfterAllAnnotationsUnitTest.class);
-        if (log != null) log.debug("Setup JUnit Tests");
     }
 
 

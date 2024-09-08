@@ -1,11 +1,29 @@
-
-import de.longri.filetransfer.Local_FileTransferHandle;
-import de.longri.utils.SystemType;
+/*
+ * Copyright (C) 2024 Longri
+ *
+ * This file is part of CrontabScheduler.
+ *
+ * CrontabScheduler is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * CrontabScheduler is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CrontabScheduler. If not, see <https://www.gnu.org/licenses/>.
+ */
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,13 +48,8 @@ public class CrontabSchedulerDependency {
 
     @BeforeAll
     static void beforeAll() throws IOException, InterruptedException {
-        //Refresh dependency update plug in
-        if(SystemType.isWindows()){
-            Thread.sleep(1000);
-            System.out.println(execCmd("./gradlew.bat dependencyUpdates"));
-        }else{
+
             System.out.println(execCmd("./gradlew dependencyUpdates"));
-        }
     }
 
 
@@ -49,13 +62,11 @@ public class CrontabSchedulerDependency {
     @Test
     void testCrontabSchedulerDependency() throws IOException {
 
-        if (SystemType.isWindows()) return;
-
         // read report file
-        Local_FileTransferHandle reportFile = new Local_FileTransferHandle("./build/dependencyUpdates/report.txt");
+        File reportFile = new File("./build/dependencyUpdates/report.txt");
         assertTrue(reportFile.exists(), "Dependency Updates report file not created");
 
-        String report = reportFile.readString("UTF-8");
+        String report = Files.readString(reportFile.toPath(), StandardCharsets.UTF_8 );
 
         String gradle = getStringBetween(report, "Gradle release-candidate updates:", null, true);
         assertTrue(gradle.contains("UP-TO-DATE"), gradle);
