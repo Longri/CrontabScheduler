@@ -69,7 +69,7 @@ public class Cronjob {
      * Constructs a Cronjob instance with the specified cron expression and job.
      *
      * @param cron the cron expression
-     * @param job the job to be executed
+     * @param job  the job to be executed
      * @throws ParseException if there is an error parsing the cron expression
      */
     public Cronjob(String cron, Job job) throws ParseException {
@@ -99,10 +99,17 @@ public class Cronjob {
     public static Cronjob getFromIniString(String jobString) throws Exception {
         if (jobString == null) throw new RuntimeException("JobString can't be NULL");
         String[] arr = jobString.split(SERIALIZE_SEPARATOR);
-        JobType type = JobType.getFromString(arr[1].trim().toUpperCase(Locale.ROOT));
-        if (type == null) return null;
+        JobType type = JobType.getFromString(arr[1].trim());
+        if (type == null)
+            throw new RuntimeException("Unknown JobType: " + arr[1].trim());
 
-        return new Cronjob(arr[0], type.getJobInstance(arr[2].trim(), arr[3].trim()));
+        Job jobInstance = null;
+        try {
+            jobInstance = type.getJobInstance(arr[2].trim(), arr[3].trim());
+        } catch (Exception e) {
+            throw new RuntimeException("can't create job instance '" + arr[2].trim() + "' from type '" + arr[1].trim() + "' with arguments [" + arr[3].trim() + "]", e);
+        }
+        return new Cronjob(arr[0], jobInstance);
     }
 
     /**
@@ -157,7 +164,7 @@ public class Cronjob {
                 return;
             }
 
-            log.info("wait for start job {} at {}", job.getName(),getNextExecution());
+            log.info("wait for start job {} at {}", job.getName(), getNextExecution());
             while (next.isAfter(LocalDateTime.now())) {
                 try {
                     Thread.sleep(250);

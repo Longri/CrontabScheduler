@@ -99,7 +99,7 @@ class Job_CopyTest {
         try {
             jc.run();
         } catch (RuntimeException e) {
-            if (e.getCause() instanceof FileNotFoundException)
+            if (e.getCause().getCause() instanceof FileNotFoundException)
                 thrown = false;
         }
         assertFalse(thrown, "method must thrown a FileNotFoundException");

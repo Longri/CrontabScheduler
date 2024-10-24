@@ -19,6 +19,7 @@
 package de.longri.crontab;
 
 
+import javafx.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.cli.*;
@@ -27,10 +28,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -43,8 +46,27 @@ public class Main {
 
     public static void main(String... args) throws IOException, java.text.ParseException, InterruptedException, ParseException, GeneralSecurityException {
         try {
-            log.info("Start with ARGS: {}", Arrays.toString(args));
+
             CommandLine cmd = getCMD(args);
+
+            if (cmd.hasOption('l')) {
+                // inital logger
+                String logger_ini_path = cmd.getOptionValue('l').trim();
+
+                Properties ini = new Properties();
+                ini.load(Files.newBufferedReader(new File(logger_ini_path).toPath()));
+
+                // write propperties to System
+
+                for (String key : ini.stringPropertyNames()) {
+                    System.setProperty(key, ini.getProperty(key));
+                }
+
+            }
+
+            log = LoggerFactory.getLogger(Main.class);
+
+            log.info("Start with ARGS: {}", Arrays.toString(args));
 
             log.debug("run with ini file: {}", cmd.getOptionValue("p"));
             File fileHandle = new File(cmd.getOptionValue("p").trim());
@@ -115,6 +137,11 @@ public class Main {
         Option host = new Option("p", "ini-path", true, "Path to ini file");
         host.setRequired(true);
         options.addOption(host);
+
+        Option logFile = new Option("l", "log-ini", true, "Path to log ini file");
+        logFile.setRequired(false);
+        options.addOption(logFile);
+
 
         return options;
     }

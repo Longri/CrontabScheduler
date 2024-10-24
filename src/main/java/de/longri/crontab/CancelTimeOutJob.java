@@ -68,22 +68,12 @@ public abstract class CancelTimeOutJob implements Runnable {
         JOB_NAME = name;
     }
 
-    /**
-     * When an object implementing interface {@code Runnable} is used
-     * to create a thread, starting the thread causes the object's
-     * {@code run} method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method {@code run} is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
-    public final void run() throws RuntimeException {
+
+    public final void run() {
 
         executor = Executors.newSingleThreadExecutor();
         future = executor.submit(new TimeOutTask());
-        RuntimeException runtimeException = null;
+        Throwable runtimeException = null;
         workTimeStart = System.currentTimeMillis();
         if (TIME_OUT_UNIT == null) {
             try {
@@ -96,7 +86,7 @@ public abstract class CancelTimeOutJob implements Runnable {
                 future.cancel(true);
                 calcWorkDuration();
                 log.debug("Work Terminated after {}!", workDuration);
-                if (e instanceof ExecutionException) runtimeException = (RuntimeException) e.getCause();
+                if (e instanceof ExecutionException) runtimeException = e.getCause();
             }
             executor.shutdownNow();
         } else {
@@ -111,7 +101,7 @@ public abstract class CancelTimeOutJob implements Runnable {
                 calcWorkDuration();
                 log.debug("Work Terminated after {}!", workDuration);
                 if (e instanceof TimeoutException) workTimeOut();
-                if (e instanceof ExecutionException) runtimeException = (RuntimeException) e.getCause();
+                if (e instanceof ExecutionException) runtimeException = e.getCause();
             }
             executor.shutdownNow();
         }
@@ -119,7 +109,10 @@ public abstract class CancelTimeOutJob implements Runnable {
         executor = null;
         future = null;
         workReady();
-        if (runtimeException != null) throw runtimeException;
+        if (runtimeException != null) {
+            runtimeException.printStackTrace();
+            throw new RuntimeException(runtimeException);
+        }
     }
 
     public void cancel() {
