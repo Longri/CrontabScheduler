@@ -43,10 +43,12 @@ import org.junit.jupiter.api.Test;
 import org.quartz.CronExpression;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -447,7 +449,8 @@ public class CronExpressionTest {
         // 9 - sunday, monday closest weekday in september
         after = LocalDateTime.of(2012, 9, 1, 0, 0, 0, 0);
         expected = LocalDateTime.of(2012, 9, 10, 0, 0, 0, 0);
-        assertTrue(cronExpr.nextTimeAfter(after).equals(expected));
+        LocalDateTime date = cronExpr.nextTimeAfter(after);
+        assertTrue(date.equals(expected));
     }
 
     @Test()
@@ -690,4 +693,21 @@ public class CronExpressionTest {
         LocalDateTime expected = LocalDateTime.of(2016, 2, 29, 0, 0, 0, 0);
         assertTrue(LocalCronExpression.createWithoutSeconds("* * 29 2 *").nextTimeAfter(after).equals(expected));
     }
+
+
+//    @Test
+//    public void CronExpressionAfterTest() throws Exception {
+//        CronExpression cronExpr = new CronExpression("0 0 0 9W * ?");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//        // Nachfolgendes Datum als Basis
+//        Date after = sdf.parse("2012-09-01"); // 1. September 2012
+//
+//        Date expected = sdf.parse("2012-09-03");;
+//        assertEquals(expected, cronExpr.getTimeAfter(after));
+//
+//
+//    }
+
+
 }
